@@ -1,5 +1,5 @@
-
 let outputCanvases = [];
+const apiKeyInput = document.getElementById('apiKeyInput').value;
 
 document.getElementById('convert').addEventListener('click', function () {
     const fileInput = document.getElementById('upload');
@@ -10,7 +10,7 @@ document.getElementById('convert').addEventListener('click', function () {
             const img = new Image();
             img.src = e.target.result;
             img.onload = function () {
-                processImage(img, file); // Pass the file to processImage
+                processImage(img, file);
             };
         };
         reader.readAsDataURL(file);
@@ -44,7 +44,7 @@ async function processAndUpload(img, file) {
                     break;
                 }
                 if (error.message.includes('Too many requests')) {
-                    await new Promise(resolve => setTimeout(resolve, 6000)); // Wait for 6 seconds
+                    await new Promise(resolve => setTimeout(resolve, 6000));
                 }
             }
         }
@@ -86,7 +86,7 @@ async function uploadToMineSkin(canvasDataURL, file) {
     }
 }
 
-function processImage(img) {
+function processImage(img, file) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 64;
@@ -103,19 +103,17 @@ function processImage(img) {
         outputCanvases.push({ canvas: outputCanvas, ctx: outputCtx });
     }
 
-    // Define the mapping for each output image with underside information
     const mappings = [
         [
-            { srcX: 16, srcY: 8, destX: 8, destY: 0, underside: false }, // head1
+            { srcX: 16, srcY: 8, destX: 8, destY: 0, underside: false },
             { srcX: 24, srcY: 40, destX: 16, destY: 0, underside: true },
             { srcX: 8, srcY: 16, destX: 0, destY: 8, underside: false },
             { srcX: 16, srcY: 16, destX: 8, destY: 8, underside: false },
             { srcX: 40, srcY: 24, destX: 16, destY: 8, underside: false },
             { srcX: 48, srcY: 24, destX: 24, destY: 8, underside: false }
         ],
-
         [
-            { srcX: 24, srcY: 8, destX: 8, destY: 0, underside: false }, // head2
+            { srcX: 24, srcY: 8, destX: 8, destY: 0, underside: false },
             { srcX: 16, srcY: 40, destX: 16, destY: 0, underside: true },
             { srcX: 0, srcY: 24, destX: 0, destY: 8, underside: false },
             { srcX: 24, srcY: 16, destX: 8, destY: 8, underside: false },
@@ -123,7 +121,7 @@ function processImage(img) {
             { srcX: 56, srcY: 24, destX: 24, destY: 8, underside: false }
         ],
         [
-            { srcX: 24, srcY: 0, destX: 8, destY: 0, underside: false }, // head3
+            { srcX: 24, srcY: 0, destX: 8, destY: 0, underside: false },
             { srcX: 16, srcY: 32, destX: 16, destY: 0, underside: true },
             { srcX: 8, srcY: 24, destX: 0, destY: 8, underside: false },
             { srcX: 16, srcY: 24, destX: 8, destY: 8, underside: false },
@@ -131,7 +129,7 @@ function processImage(img) {
             { srcX: 48, srcY: 16, destX: 24, destY: 8, underside: false }
         ],
         [
-            { srcX: 16, srcY: 0, destX: 8, destY: 0, underside: false }, // head4
+            { srcX: 16, srcY: 0, destX: 8, destY: 0, underside: false },
             { srcX: 24, srcY: 32, destX: 16, destY: 0, underside: true },
             { srcX: 0, srcY: 16, destX: 0, destY: 8, underside: false },
             { srcX: 24, srcY: 24, destX: 8, destY: 8, underside: false },
@@ -155,11 +153,10 @@ function processImage(img) {
     });
 
     document.getElementById('textureValues').textContent = 'Loading...';
-    processAndUpload(img);
+    processAndUpload(img, file);
 
-    // Generate download links for the generated images
     const downloadLinksContainer = document.getElementById('downloadLinks');
-    downloadLinksContainer.innerHTML = ''; // Clear previous links
+    downloadLinksContainer.innerHTML = '';
 
     outputCanvases.forEach((outputCanvas, index) => {
         const link = document.createElement('a');
@@ -178,6 +175,8 @@ function processImage(img) {
 
 function displayTextureValues(textureValues, failedUploads, apiKeyValid) {
     const textureValuesDiv = document.getElementById('textureValues');
+    const fullCommandDiv = document.getElementById('fullCommand');
+    const splitCommandsDiv = document.getElementById('splitCommands');
 
     if (failedUploads > 0) {
         let errorMessage = `Failed to upload ${failedUploads} file(s) to MineSkin API.`;
@@ -185,24 +184,59 @@ function displayTextureValues(textureValues, failedUploads, apiKeyValid) {
             errorMessage += ' Please check your API key.';
         }
         textureValuesDiv.textContent = errorMessage;
+        fullCommandDiv.textContent = '';
+        splitCommandsDiv.innerHTML = '';
         return;
     }
 
     const values = textureValues.map(obj => obj.value);
 
     const summonString = `/summon item_display ~-0.5 ~-0.5 ~-0.5 {Passengers:[{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[0]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.7500f,0.0000f,1.0000f,0.0000f,1.0000f,0.0000f,0.0000f,1.0000f,0.2500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[0]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.2500f,0.0000f,1.0000f,0.0000f,0.5000f,0.0000f,0.0000f,1.0000f,0.7500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[1]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.2500f,0.0000f,1.0000f,0.0000f,1.0000f,0.0000f,0.0000f,1.0000f,0.2500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[1]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.7500f,0.0000f,1.0000f,0.0000f,0.5000f,0.0000f,0.0000f,1.0000f,0.7500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[2]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.7500f,0.0000f,1.0000f,0.0000f,0.5000f,0.0000f,0.0000f,1.0000f,0.2500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[2]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.2500f,0.0000f,1.0000f,0.0000f,1.0000f,0.0000f,0.0000f,1.0000f,0.7500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[3]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.2500f,0.0000f,1.0000f,0.0000f,0.5000f,0.0000f,0.0000f,1.0000f,0.2500f,0.0000f,0.0000f,0.0000f,1.0000f]},{id:"minecraft:item_display",item:{id:"minecraft:player_head",Count:1,components:{"minecraft:profile":{id:[],properties:[{name:"textures",value:"${values[3]}"}]}}},item_display:"none",transformation:[1.0000f,0.0000f,0.0000f,0.7500f,0.0000f,1.0000f,0.0000f,1.0000f,0.0000f,0.0000f,1.0000f,0.7500f,0.0000f,0.0000f,0.0000f,1.0000f]}]}`;
-    textureValuesDiv.textContent = summonString;
 
-    // Remove existing event listeners by replacing the element
-    const newTextureValuesDiv = textureValuesDiv.cloneNode(true);
-    textureValuesDiv.parentNode.replaceChild(newTextureValuesDiv, textureValuesDiv);
+    // Удаляем содержимое textureValuesDiv, так как оно больше не нужно
+    textureValuesDiv.textContent = '';
 
-    newTextureValuesDiv.addEventListener('click', function () {
+    // Отображаем полную команду
+    fullCommandDiv.textContent = summonString;
+    fullCommandDiv.addEventListener('click', function () {
         navigator.clipboard.writeText(summonString).then(() => {
-            console.log('Summon command copied to clipboard');
+            console.log('Full summon command copied to clipboard');
         }).catch(err => {
-            console.error('Error copying to clipboard:', err);
+            console.error('Error copying full command to clipboard:', err);
         });
+    });
+
+    // Разделяем команду на части по 250 символов
+    const parts = [];
+    for (let i = 0; i < summonString.length; i += 250) {
+        parts.push(summonString.substring(i, i + 250));
+    }
+
+    // Очищаем контейнер для разделённых команд
+    splitCommandsDiv.innerHTML = '';
+
+    // Отображаем каждую часть в отдельном блоке
+    parts.forEach((part, index) => {
+        const partDiv = document.createElement('div');
+        partDiv.className = 'command-part';
+
+        const partTitle = document.createElement('h3');
+        partTitle.textContent = `Лист ${index + 1}`;
+        partDiv.appendChild(partTitle);
+
+        const partContent = document.createElement('div');
+        partContent.textContent = part;
+        partDiv.appendChild(partContent);
+
+        partDiv.addEventListener('click', function () {
+            navigator.clipboard.writeText(part).then(() => {
+                console.log(`Command part ${index + 1} copied to clipboard`);
+            }).catch(err => {
+                console.error(`Error copying command part ${index + 1} to clipboard:`, err);
+            });
+        });
+
+        splitCommandsDiv.appendChild(partDiv);
     });
 }
 
